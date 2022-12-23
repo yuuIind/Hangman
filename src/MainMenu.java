@@ -13,7 +13,7 @@ public class MainMenu implements ActionListener {
         frame.setSize(800,600);
         frame.setResizable(false);
         frame.setTitle("CSE-212 Term Project - Hangman Game");
-        ImageIcon frameLogo = new ImageIcon(getClass().getResource("./images./head.png"));
+        ImageIcon frameLogo = new ImageIcon(getClass().getResource("images./head.png"));
         frame.setIconImage(frameLogo.getImage());
         frame.getContentPane().setBackground(new Color(50,50,50));
 

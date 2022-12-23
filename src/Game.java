@@ -1,11 +1,10 @@
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Random;
+import java.io.*;
+import java.util.*;
 
 public class Game {
     ArrayList<Question> questionList = new ArrayList<>();
@@ -45,12 +44,32 @@ public class Game {
 
 
     Game(){
-        String questionFile = String.valueOf(getClass().getClassLoader().getResource("./data./questions.csv"));
-        System.out.println(questionFile);
-        questionList.add(new Question(
-                "Bruce Willis's Space Movie","I U X T S J","ARMAGEDDON", 10));
-        questionList.add(new Question(
-                "Benim Adım","M U T E D F","HAKAN", 10));
+        String filePath = "src\\data\\questions.csv";
+        String line = "";
+        BufferedReader bfReader = null;
+        try {
+            bfReader = new BufferedReader(new FileReader(filePath));
+            while((line = bfReader.readLine()) != null){
+                String[] parameters = line.split(",");
+                questionList.add(new Question(
+                        parameters[0],
+                        parameters[1],
+                        parameters[2],
+                        Integer.parseInt(parameters[3])
+                ));
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        finally {
+            try {
+                bfReader.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
         question = new Random().nextInt(2);
         emptyCase = questionList.get(question).getKey().length();
         limbs = 0;
@@ -102,7 +121,32 @@ public class Game {
                     "Enter your name, please.",
                     null,
                     JOptionPane.PLAIN_MESSAGE);
-
+            FileWriter fileWriter = null;
+            try {
+                String filePath = "src\\data\\score-table.csv";
+                fileWriter = new FileWriter(filePath);
+                fileWriter.append("\n" + name
+                        + ","
+                        + java.time.LocalDateTime.now()
+                        + ","
+                        + questionList.get(question).getKey()
+                        + ","
+                        + questionList.get(question).getKey().length()
+                        + ","
+                        + (questionList.get(question).getCdTime() - countdownValue));
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null,
+                        "IO Exception",
+                        "IO Exception",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+            finally {
+                try {
+                    fileWriter.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
     }
 
@@ -196,7 +240,7 @@ public class Game {
 
     public void setPoleLabel() {
         poleLabel = new JLabel();
-        ImageIcon poleIcon = new ImageIcon(getClass().getResource("/images/pole.png"));
+        ImageIcon poleIcon = new ImageIcon(getClass().getResource("images/pole.png"));
         poleLabel.setIcon(poleIcon);
         poleLabel.setBounds(600,100,230,270);
         gamePage.add(poleLabel);
@@ -204,7 +248,7 @@ public class Game {
 
     public void setHeadLabel() {
         headLabel = new JLabel();
-        ImageIcon headIcon = new ImageIcon(getClass().getResource("/images/head.png"));
+        ImageIcon headIcon = new ImageIcon(getClass().getResource("images/head.png"));
         headLabel.setIcon(headIcon);
         headLabel.setBounds(700,140,62,62);
         headLabel.setVisible(false);
@@ -213,7 +257,7 @@ public class Game {
 
     public void setTorsoLabel() {
         torsoLabel = new JLabel();
-        ImageIcon headIcon = new ImageIcon(getClass().getResource("/images/torso.png"));
+        ImageIcon headIcon = new ImageIcon(getClass().getResource("images/torso.png"));
         torsoLabel.setIcon(headIcon);
         torsoLabel.setBounds(700,205,63,87);
         torsoLabel.setVisible(false);
@@ -222,7 +266,7 @@ public class Game {
 
     public void setLeftArmLabel() {
         leftArmLabel = new JLabel();
-        ImageIcon headIcon = new ImageIcon(getClass().getResource("/images/left-arm.png"));
+        ImageIcon headIcon = new ImageIcon(getClass().getResource("images/left-arm.png"));
         leftArmLabel.setIcon(headIcon);
         leftArmLabel.setBounds(643,205,55,17);
         leftArmLabel.setVisible(false);
@@ -231,7 +275,7 @@ public class Game {
 
     public void setRightArmLabel() {
         rightArmLabel = new JLabel();
-        ImageIcon headIcon = new ImageIcon(getClass().getResource("/images/right-arm.png"));
+        ImageIcon headIcon = new ImageIcon(getClass().getResource("images/right-arm.png"));
         rightArmLabel.setIcon(headIcon);
         rightArmLabel.setBounds(763,205,56,17);
         rightArmLabel.setVisible(false);
@@ -240,7 +284,7 @@ public class Game {
 
     public void setLeftLegLabel() {
         leftLegLabel = new JLabel();
-        ImageIcon headIcon = new ImageIcon(getClass().getResource("/images/left-leg.png"));
+        ImageIcon headIcon = new ImageIcon(getClass().getResource("images/left-leg.png"));
         leftLegLabel.setIcon(headIcon);
         leftLegLabel.setBounds(695,293,29,42);
         leftLegLabel.setVisible(false);
@@ -249,7 +293,7 @@ public class Game {
 
     public void setRightLegLabel() {
         rightLegLabel = new JLabel();
-        ImageIcon headIcon = new ImageIcon(getClass().getResource("/images/right-leg.png"));
+        ImageIcon headIcon = new ImageIcon(getClass().getResource("images/right-leg.png"));
         rightLegLabel.setIcon(headIcon);
         rightLegLabel.setBounds(740,293,30,42);
         rightLegLabel.setVisible(false);
@@ -293,7 +337,32 @@ public class Game {
                 System.out.println("Score Table");
             }
             else if ( ( (JMenuItem)e.getSource() ).getText() == "Quit" ){
-                System.exit(0);
+                String filePath = "src\\data\\score-table.csv";
+                String line = "";
+                BufferedReader bfReader = null;
+                try {
+                    bfReader = new BufferedReader(new FileReader(filePath));
+                    String headerLine = bfReader.readLine();
+                    int topTen = 0;
+                    while(((line = bfReader.readLine()) != null) && (topTen < 10)){
+                        String[] parameters = line.split(",");
+                        String message ="Name"
+                                + parameters[0]
+                                + "";
+                        topTen++;
+                    }
+                } catch (FileNotFoundException exc) {
+                    throw new RuntimeException(exc);
+                } catch (IOException exc) {
+                    throw new RuntimeException(exc);
+                }
+                finally {
+                    try {
+                        bfReader.close();
+                    } catch (IOException exc) {
+                        throw new RuntimeException(exc);
+                    }
+                }
             }
             else{
                 String s = "Name: Muhammet Hakan\n"
@@ -313,7 +382,7 @@ public class Game {
         gamePage.setSize(900,600);
         gamePage.setResizable(false);
         gamePage.setTitle("CSE-212 Term Project - Hangman Game");
-        ImageIcon frameLogo = new ImageIcon(Objects.requireNonNull(getClass().getResource("./images./head.png")));
+        ImageIcon frameLogo = new ImageIcon(Objects.requireNonNull(getClass().getResource("images/head.png")));
         gamePage.setIconImage(frameLogo.getImage());
         gamePage.getContentPane().setBackground(new Color(79, 81, 125));
         gamePage.setLayout(null);
@@ -330,7 +399,7 @@ public class Game {
         tipLabel = new JLabel();
         tipLabel.setFont(new Font("Arial", Font.BOLD, 16));
         tipLabel.setForeground(new Color(241, 255, 250));
-        tipLabel.setBounds(10, 10, 150, 20);
+        tipLabel.setBounds(10, 10, 550, 20);
         gamePage.add(tipLabel);
         //<-------------------------------------------Tip Panel-------------------------------------------------------->
 
