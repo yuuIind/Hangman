@@ -70,7 +70,7 @@ public class Game {
                 throw new RuntimeException(e);
             }
         }
-        question = new Random().nextInt(2);
+        question = new Random().nextInt(questionList.size());
         emptyCase = questionList.get(question).getKey().length();
         limbs = 0;
         setGamePage();
@@ -123,11 +123,14 @@ public class Game {
                     JOptionPane.PLAIN_MESSAGE);
             FileWriter fileWriter = null;
             try {
+                String[] dateTime = String.valueOf(java.time.LocalDateTime.now()).split("T");
                 String filePath = "src\\data\\score-table.csv";
-                fileWriter = new FileWriter(filePath);
+                fileWriter = new FileWriter(filePath, true);
                 fileWriter.append("\n" + name
                         + ","
-                        + java.time.LocalDateTime.now()
+                        + dateTime[1]
+                        + ","
+                        + dateTime[0]
                         + ","
                         + questionList.get(question).getKey()
                         + ","
@@ -229,7 +232,7 @@ public class Game {
             answer.setFont(new Font("Arial", Font.BOLD, 16));
             answer.setPreferredSize(new Dimension(25, 25));
             answer.setHorizontalAlignment(JTextField.CENTER);
-            answer.setText("W");
+            answer.setText("");
             answer.setFocusable(false);
             answer.setEditable(false);
             answer.setBackground(new Color(221, 196, 221));
@@ -334,23 +337,31 @@ public class Game {
                 setGamePage();
             }
             else if ( ( (JMenuItem)e.getSource() ).getText() == "Score Table" ){
-                System.out.println("Score Table");
-            }
-            else if ( ( (JMenuItem)e.getSource() ).getText() == "Quit" ){
                 String filePath = "src\\data\\score-table.csv";
                 String line = "";
                 BufferedReader bfReader = null;
                 try {
+                    ArrayList<Player> playersList = new ArrayList<>();
                     bfReader = new BufferedReader(new FileReader(filePath));
                     String headerLine = bfReader.readLine();
-                    int topTen = 0;
-                    while(((line = bfReader.readLine()) != null) && (topTen < 10)){
+                    while((line = bfReader.readLine()) != null){
                         String[] parameters = line.split(",");
-                        String message ="Name"
-                                + parameters[0]
-                                + "";
-                        topTen++;
+                        playersList.add(new Player(
+                                parameters[0],
+                                parameters[1],
+                                parameters[2],
+                                parameters[3],
+                                Integer.parseInt(parameters[4]),
+                                Integer.parseInt(parameters[5])
+                        ));
                     }
+                    Collections.sort(playersList);
+                    String message = "";
+                    for(int i = 0; (i < 10)&&(i < playersList.size()); i++){
+                        message += (i+1)+"."+playersList.get(i).getName().toUpperCase(Locale.ENGLISH) + "\n";
+                    }
+                    JOptionPane.showMessageDialog(null,message,"Score Table",JOptionPane.PLAIN_MESSAGE);
+
                 } catch (FileNotFoundException exc) {
                     throw new RuntimeException(exc);
                 } catch (IOException exc) {
@@ -363,6 +374,9 @@ public class Game {
                         throw new RuntimeException(exc);
                     }
                 }
+            }
+            else if ( ( (JMenuItem)e.getSource() ).getText() == "Quit" ){
+                System.exit(0);
             }
             else{
                 String s = "Name: Muhammet Hakan\n"
