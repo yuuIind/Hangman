@@ -325,7 +325,7 @@ public class Game {
         public void actionPerformed(ActionEvent e) {
             if ( ( (JMenuItem)e.getSource() ).getText() == "New Game"){
                 gamePage.dispose();
-                question = new Random().nextInt(2);
+                question = new Random().nextInt(questionList.size());
                 emptyCase = questionList.get(question).getKey().length();
                 limbs = 0;
                 setGamePage();
